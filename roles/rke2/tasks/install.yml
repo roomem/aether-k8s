@@ -159,6 +159,13 @@
   when: inventory_hostname in groups['master_nodes']
   become: true
 
+- name: Scale up permissions of {{ ansible_env.HOME }}/.kube/config
+  file:
+    path: "{{ ansible_env.HOME }}/.kube/config"
+    mode: '0777'
+  when: inventory_hostname in groups['master_nodes']
+  become: true
+  
 - name: Replace //127.0.0.1 with {{ hostvars[groups['master_nodes'][0]]['ansible_default_ipv4']['address'] }}
   replace:
     path: "{{ ansible_env.HOME }}/.kube/config"
@@ -168,5 +175,12 @@
 - name: change {{ ansible_env.HOME }}/.kube ownership
   shell: |
     chown -R $(shell id -u):$(shell id -g) {{ ansible_env.HOME }}/.kube
+  when: inventory_hostname in groups['master_nodes']
+  become: true
+
+- name: Scale down permissions of {{ ansible_env.HOME }}/.kube/config
+  file:
+    path: "{{ ansible_env.HOME }}/.kube/config"
+    mode: '0600'
   when: inventory_hostname in groups['master_nodes']
   become: true
